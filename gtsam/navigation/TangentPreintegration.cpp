@@ -25,8 +25,21 @@ namespace gtsam {
 //------------------------------------------------------------------------------
 TangentPreintegration::TangentPreintegration(const std::shared_ptr<Params>& p,
     const Bias& biasHat) :
-    PreintegrationBase(p, biasHat) {
+    PreintegrationBase(p, biasHat, 0.0) {
   resetIntegration();
+}
+
+//------------------------------------------------------------------------------
+TangentPreintegration::TangentPreintegration(const std::shared_ptr<Params>& p,
+    const Vector9& preintegrated,
+    const Matrix93& preintegrated_H_biasAcc,
+    const Matrix93& preintegrated_H_biasOmega,
+    const imuBias::ConstantBias& biasHat,
+    double deltaTij) :
+    PreintegrationBase(p, biasHat, deltaTij),
+    preintegrated_(preintegrated),
+    preintegrated_H_biasAcc_(preintegrated_H_biasAcc),
+    preintegrated_H_biasOmega_(preintegrated_H_biasOmega) {
 }
 
 //------------------------------------------------------------------------------

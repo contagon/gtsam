@@ -53,6 +53,22 @@ public:
   TangentPreintegration(const std::shared_ptr<Params>& p,
       const imuBias::ConstantBias& biasHat = imuBias::ConstantBias());
 
+  /**
+   *  Constructor, useful for initialization from serialization.
+   *  @param p                         Parameters, typically fixed in a single application
+   *  @param preintegrated             Preintegrated nav state
+   *  @param preintegrated_H_biasAcc   Jacobian of preintegrated_ w.r.t. acceleration bias
+   *  @param preintegrated_H_biasOmega Jacobian of preintegrated_ w.r.t. angular rate bias
+   *  @param bias                      Current estimate of acceleration and rotation rate biases
+   *  @param deltaTij                  Total time duration of preintegration. Unlikely to be set here outside of serialization.
+   */
+  TangentPreintegration(const std::shared_ptr<Params>& p, 
+      const Vector9& preintegrated,
+      const Matrix93& preintegrated_H_biasAcc,
+      const Matrix93& preintegrated_H_biasOmega,
+      const imuBias::ConstantBias& biasHat = imuBias::ConstantBias(),
+      double deltaTij = 0);
+
   /// Virtual destructor
   ~TangentPreintegration() override {
   }

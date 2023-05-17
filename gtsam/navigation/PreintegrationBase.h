@@ -64,11 +64,13 @@ class GTSAM_EXPORT PreintegrationBase {
 
   /**
    *  Constructor, initializes the variables in the base class
-   *  @param p    Parameters, typically fixed in a single application
-   *  @param bias Current estimate of acceleration and rotation rate biases
+   *  @param p        Parameters, typically fixed in a single application
+   *  @param bias     Current estimate of acceleration and rotation rate biases
+   *  @param deltaTij Total time duration of preintegration. Unlikely to be set here outside of serialization.
    */
   PreintegrationBase(const std::shared_ptr<Params>& p,
-      const imuBias::ConstantBias& biasHat = imuBias::ConstantBias());
+      const imuBias::ConstantBias& biasHat = imuBias::ConstantBias(),
+      double deltaTij = 0.0);
 
   /// @}
 
