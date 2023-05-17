@@ -121,7 +121,7 @@ public:
 
   /** Optimize the bayes tree */
   VectorValues optimize() const;
-            
+
 protected:
   
   /** Compute the Bayes Tree as a helper function to the constructor */
@@ -131,16 +131,16 @@ protected:
   void computeBayesTree(const Ordering& ordering);
 
 public:
-#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V41
-  /** \deprecated argument order changed due to removing boost::optional<Ordering> */
+#ifdef GTSAM_ALLOW_DEPRECATED_SINCE_V42
+  /** @deprecated argument order changed due to removing boost::optional<Ordering> */
   GTSAM_DEPRECATED Marginals(const NonlinearFactorGraph& graph, const Values& solution, Factorization factorization,
             const Ordering& ordering) : Marginals(graph, solution, ordering, factorization) {}
 
-  /** \deprecated argument order changed due to removing boost::optional<Ordering> */
+  /** @deprecated argument order changed due to removing boost::optional<Ordering> */
   GTSAM_DEPRECATED Marginals(const GaussianFactorGraph& graph, const Values& solution, Factorization factorization,
             const Ordering& ordering) : Marginals(graph, solution, ordering, factorization) {}
 
-  /** \deprecated argument order changed due to removing boost::optional<Ordering> */
+  /** @deprecated argument order changed due to removing boost::optional<Ordering> */
   GTSAM_DEPRECATED Marginals(const GaussianFactorGraph& graph, const VectorValues& solution, Factorization factorization,
             const Ordering& ordering) : Marginals(graph, solution, ordering, factorization) {}
 #endif

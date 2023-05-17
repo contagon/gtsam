@@ -33,8 +33,6 @@ add_custom_target(gtsam_unstable_header DEPENDS "${PROJECT_SOURCE_DIR}/gtsam_uns
 set(ignore
     gtsam::Point2
     gtsam::Point3
-    gtsam::LieVector
-    gtsam::LieMatrix
     gtsam::ISAM2ThresholdMapValue
     gtsam::FactorIndices
     gtsam::FactorIndexSet
@@ -47,22 +45,30 @@ set(ignore
     gtsam::Point3Pairs
     gtsam::Pose3Pairs
     gtsam::Pose3Vector
+    gtsam::Rot3Vector
     gtsam::KeyVector
+    gtsam::BinaryMeasurementsPoint3
     gtsam::BinaryMeasurementsUnit3
+    gtsam::BinaryMeasurementsRot3
+    gtsam::DiscreteKey
     gtsam::KeyPairDoubleMap)
 
 set(interface_headers
     ${PROJECT_SOURCE_DIR}/gtsam/gtsam.i
     ${PROJECT_SOURCE_DIR}/gtsam/base/base.i
+    ${PROJECT_SOURCE_DIR}/gtsam/inference/inference.i
+    ${PROJECT_SOURCE_DIR}/gtsam/discrete/discrete.i
     ${PROJECT_SOURCE_DIR}/gtsam/geometry/geometry.i
     ${PROJECT_SOURCE_DIR}/gtsam/linear/linear.i
     ${PROJECT_SOURCE_DIR}/gtsam/nonlinear/nonlinear.i
+    ${PROJECT_SOURCE_DIR}/gtsam/nonlinear/custom.i
     ${PROJECT_SOURCE_DIR}/gtsam/symbolic/symbolic.i
     ${PROJECT_SOURCE_DIR}/gtsam/sam/sam.i
     ${PROJECT_SOURCE_DIR}/gtsam/slam/slam.i
     ${PROJECT_SOURCE_DIR}/gtsam/sfm/sfm.i
     ${PROJECT_SOURCE_DIR}/gtsam/navigation/navigation.i
     ${PROJECT_SOURCE_DIR}/gtsam/basis/basis.i
+    ${PROJECT_SOURCE_DIR}/gtsam/hybrid/hybrid.i
 )
 
 set(GTSAM_PYTHON_TARGET gtsam_py)
@@ -96,10 +102,23 @@ set(GTSAM_MODULE_PATH ${GTSAM_PYTHON_BUILD_DIRECTORY}/gtsam)
 copy_directory("${CMAKE_CURRENT_SOURCE_DIR}/gtsam"
         "${GTSAM_MODULE_PATH}")
 
-# Hack to get python test files copied every time they are modified
+# Hack to get python test and util files copied every time they are modified
 file(GLOB GTSAM_PYTHON_TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/gtsam/tests/*.py")
 foreach(test_file ${GTSAM_PYTHON_TEST_FILES})
-        configure_file(${test_file} "${GTSAM_MODULE_PATH}/tests/${test_file}" COPYONLY)
+        get_filename_component(test_file_name ${test_file} NAME)
+        configure_file(${test_file} "${GTSAM_MODULE_PATH}/tests/${test_file_name}" COPYONLY)
+endforeach()
+file(GLOB GTSAM_PYTHON_UTIL_FILES "${CMAKE_CURRENT_SOURCE_DIR}/gtsam/utils/*.py")
+foreach(util_file ${GTSAM_PYTHON_UTIL_FILES})
+        configure_file(${util_file} "${GTSAM_MODULE_PATH}/utils/${test_file}" COPYONLY)
+endforeach()
+file(GLOB GTSAM_PYTHON_PREAMBLE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/gtsam/preamble/*.h")
+foreach(util_file ${GTSAM_PYTHON_PREAMBLE_FILES})
+        configure_file(${util_file} "${GTSAM_MODULE_PATH}/preamble/${test_file}" COPYONLY)
+endforeach()
+file(GLOB GTSAM_PYTHON_SPECIALIZATION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/gtsam/specializations/*.h")
+foreach(util_file ${GTSAM_PYTHON_SPECIALIZATION_FILES})
+        configure_file(${util_file} "${GTSAM_MODULE_PATH}/specializations/${test_file}" COPYONLY)
 endforeach()
 
 # Common directory for data/datasets stored with the package.
@@ -114,8 +133,6 @@ if(GTSAM_UNSTABLE_BUILD_PYTHON)
     set(ignore
             gtsam::Point2
             gtsam::Point3
-            gtsam::LieVector
-            gtsam::LieMatrix
             gtsam::ISAM2ThresholdMapValue
             gtsam::FactorIndices
             gtsam::FactorIndexSet
@@ -124,7 +141,9 @@ if(GTSAM_UNSTABLE_BUILD_PYTHON)
             gtsam::Pose3Vector
             gtsam::KeyVector
             gtsam::FixedLagSmootherKeyTimestampMapValue
+            gtsam::BinaryMeasurementsPoint3
             gtsam::BinaryMeasurementsUnit3
+            gtsam::BinaryMeasurementsRot3
             gtsam::CameraSetCal3_S2
             gtsam::CameraSetCal3Bundler
             gtsam::CameraSetCal3Unified
@@ -160,7 +179,7 @@ if(GTSAM_UNSTABLE_BUILD_PYTHON)
 
     # Hack to get python test files copied every time they are modified
     file(GLOB GTSAM_UNSTABLE_PYTHON_TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/gtsam_unstable/tests/*.py")
-    foreach(test_file ${GTSAM_PYTHON_TEST_FILES})
+    foreach(test_file ${GTSAM_UNSTABLE_PYTHON_TEST_FILES})
         configure_file(${test_file} "${GTSAM_UNSTABLE_MODULE_PATH}/tests/${test_file}" COPYONLY)
     endforeach()
 
@@ -172,7 +191,7 @@ endif()
 # Add custom target so we can install with `make python-install`
 set(GTSAM_PYTHON_INSTALL_TARGET python-install)
 add_custom_target(${GTSAM_PYTHON_INSTALL_TARGET}
-        COMMAND ${PYTHON_EXECUTABLE} ${GTSAM_PYTHON_BUILD_DIRECTORY}/setup.py install
+        COMMAND ${PYTHON_EXECUTABLE} -m pip install .
         DEPENDS ${GTSAM_PYTHON_DEPENDENCIES}
         WORKING_DIRECTORY ${GTSAM_PYTHON_BUILD_DIRECTORY})
 
@@ -183,5 +202,5 @@ add_custom_target(
           ${CMAKE_COMMAND} -E env # add package to python path so no need to install
           "PYTHONPATH=${GTSAM_PYTHON_BUILD_DIRECTORY}/$ENV{PYTHONPATH}"
           ${PYTHON_EXECUTABLE} -m unittest discover -v -s .
-          DEPENDS ${GTSAM_PYTHON_DEPENDENCIES}
+          DEPENDS ${GTSAM_PYTHON_DEPENDENCIES} ${GTSAM_PYTHON_TEST_FILES}
           WORKING_DIRECTORY "${GTSAM_PYTHON_BUILD_DIRECTORY}/gtsam/tests")

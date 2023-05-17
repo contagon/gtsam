@@ -28,7 +28,7 @@ namespace gtsam {
 /**
  * A class for a measurement predicted by "between(config[key1],config[key2])"
  * @tparam VALUE the Value type
- * @addtogroup SLAM
+ * @ingroup SLAM
  */
 template<class VALUE>
 class BetweenFactorEM: public NonlinearFactor {
@@ -420,5 +420,9 @@ private:
   }
 };
 // \class BetweenFactorEM
+
+/// traits
+template<class VALUE>
+struct traits<BetweenFactorEM<VALUE> > : public Testable<BetweenFactorEM<VALUE> > {};
 
 }  // namespace gtsam

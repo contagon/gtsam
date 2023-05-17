@@ -23,7 +23,7 @@
 namespace gtsam {
 /**
  *
- * @addtogroup SLAM
+ * @ingroup SLAM
  *
  * If you are using the factor, please cite:
  * L. Carlone, Z. Kira, C. Beall, V. Indelman, F. Dellaert,
@@ -38,9 +38,10 @@ namespace gtsam {
  * calibration or the same calibration can be shared by multiple cameras. This
  * factor requires that values contain the involved poses and extrinsics (both
  * are Pose3 variables).
- * @addtogroup SLAM
+ * @ingroup SLAM
  */
-class SmartStereoProjectionFactorPP : public SmartStereoProjectionFactor {
+class GTSAM_UNSTABLE_EXPORT SmartStereoProjectionFactorPP
+    : public SmartStereoProjectionFactor {
  protected:
   /// shared pointer to calibration object (one for each camera)
   std::vector<boost::shared_ptr<Cal3_S2Stereo>> K_all_;
@@ -294,7 +295,6 @@ class SmartStereoProjectionFactorPP : public SmartStereoProjectionFactor {
     ar& BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
     ar & BOOST_SERIALIZATION_NVP(K_all_);
   }
-
 };
 // end of class declaration
 

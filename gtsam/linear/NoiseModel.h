@@ -697,6 +697,12 @@ namespace gtsam {
         return robust_->loss(std::sqrt(squared_distance));
       }
 
+      // NOTE: This is special because in whiten the base version will do the reweighting
+      // which is incorrect!
+      double squaredMahalanobisDistance(const Vector& v) const override {
+        return noise_->squaredMahalanobisDistance(v);
+      }
+
       // These are really robust iterated re-weighting support functions
       virtual void WhitenSystem(Vector& b) const;
       void WhitenSystem(std::vector<Matrix>& A, Vector& b) const override;
@@ -730,8 +736,8 @@ namespace gtsam {
 
   } // namespace noiseModel
 
-  /** Note, deliberately not in noiseModel namespace.
-   * Deprecated. Only for compatibility with previous version.
+  /** 
+   * Aliases. Deliberately not in noiseModel namespace.
    */
   typedef noiseModel::Base::shared_ptr SharedNoiseModel;
   typedef noiseModel::Gaussian::shared_ptr SharedGaussian;

@@ -53,6 +53,7 @@ typedef ManifoldPreintegration PreintegrationType;
  *     TRO, 28(1):61-76, 2012.
  * [3] L. Carlone, S. Williams, R. Roberts, "Preintegrated IMU factor:
  *     Computation of the Jacobian Matrices", Tech. Report, 2013.
+ *     Available in this repo as "PreintegratedIMUJacobians.pdf".
  * [4] C. Forster, L. Carlone, F. Dellaert, D. Scaramuzza, "IMU Preintegration on
  *     Manifold for Efficient Visual-Inertial Maximum-a-Posteriori Estimation",
  *     Robotics: Science and Systems (RSS), 2015.
@@ -66,7 +67,7 @@ typedef ManifoldPreintegration PreintegrationType;
  * as soon as it is received from the IMU) so as to avoid costly integration
  * at time of factor construction.
  *
- * @addtogroup SLAM
+ * @ingroup SLAM
  */
 class GTSAM_EXPORT PreintegratedImuMeasurements: public PreintegrationType {
 
@@ -121,7 +122,11 @@ public:
 
   /**
    * Add a single IMU measurement to the preintegration.
-   * @param measuredAcc Measured acceleration (in body frame, as given by the sensor)
+   * Both accelerometer and gyroscope measurements are taken to be in the sensor
+   * frame and conversion to the body frame is handled by `body_P_sensor` in
+   * `PreintegrationParams`.
+   *
+   * @param measuredAcc Measured acceleration (as given by the sensor)
    * @param measuredOmega Measured angular velocity (as given by the sensor)
    * @param dt Time interval between this and the last IMU measurement
    */
@@ -161,7 +166,7 @@ public:
  * (which are usually slowly varying quantities), which is up to the caller.
  * See also CombinedImuFactor for a class that does this for you.
  *
- * @addtogroup SLAM
+ * @ingroup SLAM
  */
 class GTSAM_EXPORT ImuFactor: public NoiseModelFactor5<Pose3, Vector3, Pose3, Vector3,
     imuBias::ConstantBias> {
@@ -252,7 +257,7 @@ public:
 
 /**
  * ImuFactor2 is a ternary factor that uses NavStates rather than Pose/Velocity.
- * @addtogroup SLAM
+ * @ingroup SLAM
  */
 class GTSAM_EXPORT ImuFactor2 : public NoiseModelFactor3<NavState, NavState, imuBias::ConstantBias> {
 private:

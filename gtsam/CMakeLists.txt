@@ -10,12 +10,13 @@ set (gtsam_subdirs
     inference
     symbolic
     discrete
+    hybrid
     linear
     nonlinear
     sam
     sfm
     slam
-	  navigation
+    navigation
 )
 
 set(gtsam_srcs)

@@ -4,7 +4,69 @@
 
 namespace gtsam {
 
-// #####
+#include <gtsam/nonlinear/NonlinearFactorGraph.h>
+#include <gtsam/nonlinear/Values.h>
+#include <gtsam/sfm/SfmTrack.h>
+class SfmTrack {
+  SfmTrack();
+  SfmTrack(const gtsam::Point3& pt);
+  const Point3& point3() const;
+  
+  Point3 p;
+
+  double r;
+  double g;
+  double b;
+
+  std::vector<pair<size_t, gtsam::Point2>> measurements;
+
+  size_t numberMeasurements() const;
+  pair<size_t, gtsam::Point2> measurement(size_t idx) const;
+  pair<size_t, size_t> siftIndex(size_t idx) const;
+  void addMeasurement(size_t idx, const gtsam::Point2& m);
+
+  // enabling serialization functionality
+  void serialize() const;
+
+  // enabling function to compare objects
+  bool equals(const gtsam::SfmTrack& expected, double tol) const;
+};
+
+#include <gtsam/sfm/SfmData.h>
+class SfmData {
+  SfmData();
+  static gtsam::SfmData FromBundlerFile(string filename);
+  static gtsam::SfmData FromBalFile(string filename);
+
+  std::vector<gtsam::SfmTrack>& trackList() const;
+  std::vector<gtsam::PinholeCamera<gtsam::Cal3Bundler>>& cameraList() const;
+
+  void addTrack(const gtsam::SfmTrack& t);
+  void addCamera(const gtsam::SfmCamera& cam);
+  size_t numberTracks() const;
+  size_t numberCameras() const;
+  gtsam::SfmTrack& track(size_t idx) const;
+  gtsam::PinholeCamera<gtsam::Cal3Bundler>& camera(size_t idx) const;
+
+  gtsam::NonlinearFactorGraph generalSfmFactors(
+      const gtsam::SharedNoiseModel& model =
+          gtsam::noiseModel::Isotropic::Sigma(2, 1.0)) const;
+  gtsam::NonlinearFactorGraph sfmFactorGraph(
+      const gtsam::SharedNoiseModel& model =
+          gtsam::noiseModel::Isotropic::Sigma(2, 1.0),
+      size_t fixedCamera = 0, size_t fixedPoint = 0) const;
+
+  // enabling serialization functionality
+  void serialize() const;
+
+  // enabling function to compare objects
+  bool equals(const gtsam::SfmData& expected, double tol) const;
+};
+
+gtsam::SfmData readBal(string filename);
+bool writeBAL(string filename, gtsam::SfmData& data);
+gtsam::Values initialCamerasEstimate(const gtsam::SfmData& db);
+gtsam::Values initialCamerasAndPointsEstimate(const gtsam::SfmData& db);
 
 #include <gtsam/sfm/ShonanFactor.h>
 
@@ -28,12 +90,27 @@ class BinaryMeasurement {
 
 typedef gtsam::BinaryMeasurement<gtsam::Unit3> BinaryMeasurementUnit3;
 typedef gtsam::BinaryMeasurement<gtsam::Rot3> BinaryMeasurementRot3;
+typedef gtsam::BinaryMeasurement<gtsam::Point3> BinaryMeasurementPoint3;
 
 class BinaryMeasurementsUnit3 {
   BinaryMeasurementsUnit3();
   size_t size() const;
   gtsam::BinaryMeasurement<gtsam::Unit3> at(size_t idx) const;
   void push_back(const gtsam::BinaryMeasurement<gtsam::Unit3>& measurement);
+};
+
+class BinaryMeasurementsPoint3 {
+  BinaryMeasurementsPoint3();
+  size_t size() const;
+  gtsam::BinaryMeasurement<gtsam::Point3> at(size_t idx) const;
+  void push_back(const gtsam::BinaryMeasurement<gtsam::Point3>& measurement);
+};
+
+class BinaryMeasurementsRot3 {
+  BinaryMeasurementsRot3();
+  size_t size() const;
+  gtsam::BinaryMeasurement<gtsam::Rot3> at(size_t idx) const;
+  void push_back(const gtsam::BinaryMeasurement<gtsam::Rot3>& measurement);
 };
 
 #include <gtsam/sfm/ShonanAveraging.h>
@@ -87,12 +164,12 @@ class ShonanAveraging2 {
   ShonanAveraging2(string g2oFile);
   ShonanAveraging2(string g2oFile,
                    const gtsam::ShonanAveragingParameters2& parameters);
-  ShonanAveraging2(const gtsam::BetweenFactorPose2s &factors,
-                   const gtsam::ShonanAveragingParameters2 &parameters);
+  ShonanAveraging2(const gtsam::BetweenFactorPose2s& factors,
+                   const gtsam::ShonanAveragingParameters2& parameters);
 
   // Query properties
   size_t nrUnknowns() const;
-  size_t nrMeasurements() const;
+  size_t numberMeasurements() const;
   gtsam::Rot2 measured(size_t i);
   gtsam::KeyVector keys(size_t i);
 
@@ -129,6 +206,10 @@ class ShonanAveraging2 {
 };
 
 class ShonanAveraging3 {
+  ShonanAveraging3(
+      const std::vector<gtsam::BinaryMeasurement<gtsam::Rot3>>& measurements,
+      const gtsam::ShonanAveragingParameters3& parameters =
+          gtsam::ShonanAveragingParameters3());
   ShonanAveraging3(string g2oFile);
   ShonanAveraging3(string g2oFile,
                    const gtsam::ShonanAveragingParameters3& parameters);
@@ -140,7 +221,7 @@ class ShonanAveraging3 {
 
   // Query properties
   size_t nrUnknowns() const;
-  size_t nrMeasurements() const;
+  size_t numberMeasurements() const;
   gtsam::Rot3 measured(size_t i);
   gtsam::KeyVector keys(size_t i);
 
@@ -197,15 +278,36 @@ class MFAS {
 };
 
 #include <gtsam/sfm/TranslationRecovery.h>
+
 class TranslationRecovery {
-  TranslationRecovery(
+  TranslationRecovery(const gtsam::LevenbergMarquardtParams& lmParams);
+  TranslationRecovery();  // default params.
+  void addPrior(const gtsam::BinaryMeasurementsUnit3& relativeTranslations,
+                const double scale,
+                const gtsam::BinaryMeasurementsPoint3& betweenTranslations,
+                gtsam::NonlinearFactorGraph @graph,
+                const gtsam::SharedNoiseModel& priorNoiseModel) const;
+  void addPrior(const gtsam::BinaryMeasurementsUnit3& relativeTranslations,
+                const double scale,
+                const gtsam::BinaryMeasurementsPoint3& betweenTranslations,
+                gtsam::NonlinearFactorGraph @graph) const;
+  gtsam::NonlinearFactorGraph buildGraph(
+      const gtsam::BinaryMeasurementsUnit3& relativeTranslations) const;
+  gtsam::Values run(const gtsam::BinaryMeasurementsUnit3& relativeTranslations,
+                    const double scale,
+                    const gtsam::BinaryMeasurementsPoint3& betweenTranslations,
+                    const gtsam::Values& initialValues) const;
+  // default random initial values
+  gtsam::Values run(
       const gtsam::BinaryMeasurementsUnit3& relativeTranslations,
-      const gtsam::LevenbergMarquardtParams& lmParams);
-  TranslationRecovery(
-      const gtsam::BinaryMeasurementsUnit3&
-          relativeTranslations);  // default LevenbergMarquardtParams
-  gtsam::Values run(const double scale) const;
-  gtsam::Values run() const;  // default scale = 1.0
+      const double scale,
+      const gtsam::BinaryMeasurementsPoint3& betweenTranslations) const;
+  // default empty betweenTranslations
+  gtsam::Values run(const gtsam::BinaryMeasurementsUnit3& relativeTranslations,
+                    const double scale) const;
+  // default scale = 1.0, empty betweenTranslations
+  gtsam::Values run(
+      const gtsam::BinaryMeasurementsUnit3& relativeTranslations) const;
 };
 
 }  // namespace gtsam
