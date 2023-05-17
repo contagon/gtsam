@@ -169,6 +169,9 @@ public:
   /** return flag for throwing cheirality exceptions */
   inline bool throwCheirality() const { return throwCheirality_; }
 
+  /** return body to sensor transform, if it has been set */
+  std::optional<POSE> body_P_sensor() const { return body_P_sensor_; }
+
 private:
 #ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
   /** Serialization function */
