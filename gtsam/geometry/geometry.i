@@ -808,6 +808,7 @@ class Cal3_S2Stereo {
   double skew() const;
   double px() const;
   double py() const;
+  Matrix K() const;
   gtsam::Point2 principalPoint() const;
   double baseline() const;
 };
