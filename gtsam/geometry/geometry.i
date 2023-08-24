@@ -811,6 +811,7 @@ class Cal3_S2Stereo {
   Matrix K() const;
   gtsam::Point2 principalPoint() const;
   double baseline() const;
+  Vector6 vector() const;
 };
 
 #include <gtsam/geometry/Cal3Bundler.h>
