@@ -53,6 +53,13 @@ public:
   TangentPreintegration(const boost::shared_ptr<Params>& p,
       const imuBias::ConstantBias& biasHat = imuBias::ConstantBias());
 
+  TangentPreintegration(const boost::shared_ptr<Params>& p, 
+      const Vector9& preintegrated,
+      const Matrix93& preintegrated_H_biasAcc,
+      const Matrix93& preintegrated_H_biasOmega,
+      const imuBias::ConstantBias& biasHat = imuBias::ConstantBias(),
+      double deltaTij = 0);
+
   /// Virtual destructor
   ~TangentPreintegration() override {
   }

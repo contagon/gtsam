@@ -131,6 +131,7 @@ virtual class NonlinearFactor {
 virtual class NoiseModelFactor : gtsam::NonlinearFactor {
   bool equals(const gtsam::NoiseModelFactor& other, double tol) const;
   gtsam::noiseModel::Base* noiseModel() const;
+  gtsam::NoiseModelFactor* cloneWithNewNoiseModel(gtsam::noiseModel::Base* newNoise) const;
   Vector unwhitenedError(const gtsam::Values& x) const;
   Vector whitenedError(const gtsam::Values& x) const;
 };
@@ -545,6 +546,8 @@ virtual class GncParams {
   enum Verbosity {
     SILENT,
     SUMMARY,
+    MU,
+    WEIGHTS,
     VALUES
   };
 };

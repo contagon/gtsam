@@ -68,7 +68,8 @@ class GTSAM_EXPORT PreintegrationBase {
    *  @param bias Current estimate of acceleration and rotation rate biases
    */
   PreintegrationBase(const boost::shared_ptr<Params>& p,
-      const imuBias::ConstantBias& biasHat = imuBias::ConstantBias());
+      const imuBias::ConstantBias& biasHat = imuBias::ConstantBias(),
+      double deltaTij = 0.0);
 
   /// @}
 

@@ -31,6 +31,19 @@ TangentPreintegration::TangentPreintegration(const boost::shared_ptr<Params>& p,
 }
 
 //------------------------------------------------------------------------------
+TangentPreintegration::TangentPreintegration(const boost::shared_ptr<Params>& p,
+    const Vector9& preintegrated,
+    const Matrix93& preintegrated_H_biasAcc,
+    const Matrix93& preintegrated_H_biasOmega,
+    const imuBias::ConstantBias& biasHat,
+    double deltaTij) :
+    PreintegrationBase(p, biasHat, deltaTij),
+    preintegrated_(preintegrated),
+    preintegrated_H_biasAcc_(preintegrated_H_biasAcc),
+    preintegrated_H_biasOmega_(preintegrated_H_biasOmega) {
+}
+
+//------------------------------------------------------------------------------
 void TangentPreintegration::resetIntegration() {
   deltaTij_ = 0.0;
   preintegrated_.setZero();
